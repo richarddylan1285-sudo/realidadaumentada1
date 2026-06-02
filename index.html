@@ -1,247 +1,157 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor Interactivo de Sólidos en RA</title>
+    
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
-<title>RA - Sólidos Geométricos</title>
+    <style>
+        /* Reseteo de estilos para pantalla completa en RA */
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
-<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-<script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+        /* Contenedor de la Interfaz Web flotante (UI) */
+        #menu-container {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 9999; /* Asegura el renderizado por encima del canvas 3D */
+            width: 85%;
+            max-width: 420px;
+            background: rgba(20, 20, 25, 0.75);
+            backdrop-filter: blur(12px); /* Efecto blur moderno */
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            padding: 10px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            box-sizing: border-box;
+        }
 
-<style>
+        /* Estilo responsivo moderno para los botones del menú */
+        .btn-control {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: none;
+            padding: 12px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 10px;
+            cursor: pointer;
+            flex: 1;
+            margin: 0 5px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            outline: none;
+        }
 
-body{
-    margin:0;
-    overflow:hidden;
-    font-family:Arial, sans-serif;
-}
+        /* Clase de activación para resaltar el sólido en pantalla */
+        .btn-control.active {
+            background-color: #007aff; /* Azul eléctrico de alto contraste */
+            color: #ffffff;
+            box-shadow: 0 0 15px rgba(0, 122, 255, 0.5);
+            transform: scale(1.03);
+        }
 
-#menu{
-    position:fixed;
-    bottom:15px;
-    left:50%;
-    transform:translateX(-50%);
-    display:flex;
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:8px;
-    z-index:999;
-    width:95%;
-}
-
-#menu button{
-    padding:10px 15px;
-    border:none;
-    border-radius:8px;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-
-.cubo{background:#2196F3;}
-.esfera{background:#4CAF50;}
-.cilindro{background:#FF9800;}
-.tetraedro{background:#9C27B0;}
-.octaedro{background:#E91E63;}
-
-#info{
-    position:fixed;
-    top:10px;
-    left:10px;
-    z-index:999;
-    background:rgba(0,0,0,.7);
-    color:white;
-    padding:10px;
-    border-radius:10px;
-    width:260px;
-}
-
-</style>
+        /* Feedback táctil nativo en dispositivos móviles */
+        .btn-control:active {
+            transform: scale(0.95);
+        }
+    </style>
 </head>
-
 <body>
 
-<div id="info">
-    <h3 id="titulo">Cubo</h3>
-    <p id="datos">
-        Caras: 6<br>
-        Aristas: 12<br>
-        Vértices: 8
-    </p>
-</div>
+    <div id="menu-container">
+        <button class="btn-control active" onclick="seleccionarSolido('cubo', this)">Cubo</button>
+        <button class="btn-control" onclick="seleccionarSolido('esfera', this)">Esfera</button>
+        <button class="btn-control" onclick="seleccionarSolido('cilindro', this)">Cilindro</button>
+    </div>
 
-<div id="menu">
+    <a-scene embedded 
+             arjs="sourceType: webcam; videoSettings: { facingMode: 'environment' }; debugUIEnabled: false;"
+             renderer="logarithmicDepthBuffer: true; precision: medium;">
+        
+        <a-marker preset="hiro">
+            
+            <a-entity position="0 0.6 0" scale="0.75 0.75 0.75">
+                
+                <a-entity id="solido-cubo" visible="true">
+                    <a-box position="0 0 0" 
+                           material="color: #00c8ff; opacity: 0.8; transparent: true; roughness: 0.2;"
+                           animation="property: rotation; to: 360 360 0; loop: true; dur: 9000; easing: linear">
+                        <a-box position="0 0 0" material="wireframe: true; color: #ffffff;" scale="1.002 1.002 1.002"></a-box>
+                    </a-box>
+                </a-entity>
 
-<button class="cubo"
-onclick="mostrarFigura('cubo')">
-Cubo
-</button>
+                <a-entity id="solido-esfera" visible="false">
+                    <a-sphere position="0 0 0" radius="0.65"
+                              material="color: #ff2a6d; opacity: 0.8; transparent: true; roughness: 0.2;"
+                              animation="property: rotation; to: 0 360 360; loop: true; dur: 9000; easing: linear">
+                        <a-sphere position="0 0 0" radius="0.652" material="wireframe: true; color: #ffffff;"></a-sphere>
+                    </a-sphere>
+                </a-entity>
 
-<button class="esfera"
-onclick="mostrarFigura('esfera')">
-Esfera
-</button>
+                <a-entity id="solido-cilindro" visible="false">
+                    <a-cylinder position="0 0 0" radius="0.5" height="1.2"
+                                material="color: #05d9e8; opacity: 0.8; transparent: true; roughness: 0.2;"
+                                animation="property: rotation; to: 360 0 360; loop: true; dur: 9000; easing: linear">
+                        <a-cylinder position="0 0 0" radius="0.502" height="1.202" material="wireframe: true; color: #ffffff;"></a-cylinder>
+                    </a-cylinder>
+                </a-entity>
 
-<button class="cilindro"
-onclick="mostrarFigura('cilindro')">
-Cilindro
-</button>
+            </a-entity>
+            
+        </a-marker>
 
-<button class="tetraedro"
-onclick="mostrarFigura('tetraedro')">
-Tetraedro
-</button>
+        <a-entity camera></a-entity>
+        
+    </a-scene>
 
-<button class="octaedro"
-onclick="mostrarFigura('octaedro')">
-Octaedro
-</button>
+    <script>
+        // Almacenamos las referencias del árbol DOM en un diccionario estático para evitar búsquedas repetitivas
+        const elementosSolidos = {
+            cubo: document.getElementById('solido-cubo'),
+            esfera: document.getElementById('solido-esfera'),
+            cilindro: document.getElementById('solido-cilindro')
+        };
 
-</div>
+        /**
+         * Alterna el estado de visibilidad del motor WebXR y gestiona los estados de la UI.
+         * @param {string} idSeleccionado - Llave del sólido geométrico mapeado.
+         * @param {HTMLElement} botonActual - Elemento HTML del botón clickeado para modificar su estilo.
+         */
+        function seleccionarSolido(idSeleccionado, botonActual) {
+            
+            // 1. Lógica Tridimensional: Recorrer las claves del diccionario y alternar visibilidad
+            Object.keys(elementosSolidos).forEach(clave => {
+                if (clave === idSeleccionado) {
+                    // Muestra el sólido seleccionado estableciendo el atributo nativo de A-Frame
+                    elementosSolidos[clave].setAttribute('visible', 'true');
+                } else {
+                    // Oculta los sólidos restantes para liberar procesamiento de fragmentos
+                    elementosSolidos[clave].setAttribute('visible', 'false');
+                }
+            });
 
-<a-scene
-embedded
-arjs="sourceType:webcam;debugUIEnabled:false;">
+            // 2. Lógica de Interfaz de Usuario (UI): Resetear clases activas de todos los botones
+            const todosLosBotones = document.querySelectorAll('.btn-control');
+            todosLosBotones.forEach(btn => btn.classList.remove('active'));
 
-<a-marker preset="hiro">
-
-<!-- CUBO -->
-<a-box
-id="cubo"
-position="0 0.7 0"
-color="#2196F3"
-animation="property: rotation;
-to:0 360 0;
-loop:true;
-dur:8000;
-easing:linear">
-</a-box>
-
-<!-- ESFERA -->
-<a-sphere
-id="esfera"
-position="0 0.7 0"
-radius="0.7"
-color="#4CAF50"
-visible="false"
-animation="property: rotation;
-to:0 360 0;
-loop:true;
-dur:8000;
-easing:linear">
-</a-sphere>
-
-<!-- CILINDRO -->
-<a-cylinder
-id="cilindro"
-position="0 0.7 0"
-radius="0.5"
-height="1.2"
-color="#FF9800"
-visible="false"
-animation="property: rotation;
-to:0 360 0;
-loop:true;
-dur:8000;
-easing:linear">
-</a-cylinder>
-
-<!-- TETRAEDRO -->
-<a-tetrahedron
-id="tetraedro"
-position="0 0.8 0"
-radius="0.8"
-color="#9C27B0"
-visible="false"
-animation="property: rotation;
-to:360 360 0;
-loop:true;
-dur:8000;
-easing:linear">
-</a-tetrahedron>
-
-<!-- OCTAEDRO -->
-<a-octahedron
-id="octaedro"
-position="0 0.8 0"
-radius="0.8"
-color="#E91E63"
-visible="false"
-animation="property: rotation;
-to:360 360 0;
-loop:true;
-dur:8000;
-easing:linear">
-</a-octahedron>
-
-</a-marker>
-
-<a-entity camera></a-entity>
-
-</a-scene>
-
-<script>
-
-const info = {
-
-cubo:{
-titulo:"Cubo",
-texto:"Caras: 6<br>Aristas: 12<br>Vértices: 8"
-},
-
-esfera:{
-titulo:"Esfera",
-texto:"Superficie curva<br>No tiene aristas<br>No tiene vértices"
-},
-
-cilindro:{
-titulo:"Cilindro",
-texto:"2 bases circulares<br>1 superficie curva<br>Altura h"
-},
-
-tetraedro:{
-titulo:"Tetraedro",
-texto:"Caras: 4<br>Aristas: 6<br>Vértices: 4"
-},
-
-octaedro:{
-titulo:"Octaedro",
-texto:"Caras: 8<br>Aristas: 12<br>Vértices: 6"
-}
-
-};
-
-function mostrarFigura(figura){
-
-const figuras=[
-'cubo',
-'esfera',
-'cilindro',
-'tetraedro',
-'octaedro'
-];
-
-figuras.forEach(f=>{
-document
-.getElementById(f)
-.setAttribute('visible',false);
-});
-
-document
-.getElementById(figura)
-.setAttribute('visible',true);
-
-document
-.getElementById('titulo')
-.innerHTML=info[figura].titulo;
-
-document
-.getElementById('datos')
-.innerHTML=info[figura].texto;
-}
-
-</script>
-
+            // Asignar el estado activo visual únicamente al botón interactuado
+            botonActual.classList.add('active');
+        }
+    </script>
 </body>
 </html>
