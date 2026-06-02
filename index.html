@@ -1,43 +1,153 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RA: Sólidos Geométricos</title>
+    <title>Visor de Sólidos Geométricos en RA</title>
     
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    
+
     <style>
-        body { margin: 0; overflow: hidden; }
+        /* Estilos globales para la app de RA */
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        /* Contenedor principal de la Interfaz de Usuario (UI) */
+        #ui-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000; /* Asegura que se dibuje por encima de la cámara */
+            width: 90%;
+            max-width: 400px;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px); /* Efecto esmerilado moderno */
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            display: flex;
+            justify-content: space-around;
+            box-sizing: border-box;
+        }
+
+        /* Estilo base para los botones responsivos */
+        .btn-solido {
+            background-color: #1e1e2f;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
+        }
+
+        /* Estado activo para el sólido seleccionado */
+        .btn-solido.active {
+            background-color: #007bff;
+            box-shadow: 0 0 12px rgba(0, 123, 255, 0.6);
+            transform: scale(1.05);
+        }
+
+        /* Efecto feedback táctil/hover */
+        .btn-solido:active {
+            transform: scale(0.95);
+        }
     </style>
 </head>
 <body>
 
-    <a-scene embedded arjs="sourceType: webcam; videoSettings: { facingMode: 'environment' }; debugUIEnabled: false;">
+    <div id="ui-container">
+        <button class="btn-solido active" onclick="cambiarSolido('cubo')">Cubo</button>
+        <button class="btn-solido" onclick="cambiarSolido('esfera')">Esfera</button>
+        <button class="btn-solido" onclick="cambiarSolido('cilindro')">Cilindro</button>
+    </div>
+
+    <a-scene embedded 
+             arjs="sourceType: webcam; videoSettings: { facingMode: 'environment' }; debugUIEnabled: false;" 
+             renderer="logarithmicDepthBuffer: true;">
         
         <a-marker preset="hiro">
-            <a-entity position="0 0 0" scale="0.7 0.7 0.7">
+            
+            <a-entity position="0 0.6 0" scale="0.8 0.8 0.8">
                 
-                <a-entity position="-1.5 0.5 0">
-                    <a-box position="0 0 0" material="color: #4CC3D9; opacity: 0.8; transparent: true;"></a-box>
-                    <a-line start="0 0 0.5" end="0 0.8 0.8" color="#FFF"></a-line>
-                    <a-text value="Cara" position="0 0.9 0.8" scale="0.5 0.5 0.5" align="center" color="#000" geometry="primitive: plane; width: 0.6; height: 0.25" material="color: #FFF; shader: flat"></a-text>
+                <a-entity id="solido-cubo" visible="true">
+                    <a-box position="0 0 0" 
+                           material="color: #00c6ff; opacity: 0.85; transparent: true; roughness: 0.3;"
+                           animation="property: rotation; to: 360 360 0; loop: true; dur: 8000; easing: linear">
+                        <a-box position="0 0 0" material="wireframe: true; color: #ffffff;" scale="1.002 1.002 1.002"></a-box>
+                    </a-box>
                 </a-entity>
 
-                <a-entity position="1.5 0.5 0">
-                    <a-cylinder position="0 0 0" radius="0.5" height="1.2" material="color: #FFC65D; opacity: 0.8; transparent: true;"></a-cylinder>
-                    <a-line start="0 0.6 0" end="0 1.2 0.5" color="#FFF"></a-line>
-                    <a-text value="Base Superior" position="0 1.3 0.5" scale="0.5 0.5 0.5" align="center" color="#000" geometry="primitive: plane; width: 1.4; height: 0.25" material="color: #FFF; shader: flat"></a-text>
+                <a-entity id="solido-esfera" visible="false">
+                    <a-sphere position="0 0 0" radius="0.6"
+                              material="color: #ff416c; opacity: 0.85; transparent: true; roughness: 0.3;"
+                              animation="property: rotation; to: 0 360 360; loop: true; dur: 8000; easing: linear">
+                        <a-sphere position="0 0 0" radius="0.601" material="wireframe: true; color: #ffffff;"></a-sphere>
+                    </a-sphere>
+                </a-entity>
+
+                <a-entity id="solido-cilindro" visible="false">
+                    <a-cylinder position="0 0 0" radius="0.5" height="1.2"
+                                material="color: #ffb75e; opacity: 0.85; transparent: true; roughness: 0.3;"
+                                animation="property: rotation; to: 360 0 360; loop: true; dur: 8000; easing: linear">
+                        <a-cylinder position="0 0 0" radius="0.501" height="1.202" material="wireframe: true; color: #ffffff;"></a-cylinder>
+                    </a-cylinder>
                 </a-entity>
 
             </a-entity>
+            
         </a-marker>
 
         <a-entity camera></a-entity>
         
     </a-scene>
+
+    <script>
+        // Diccionario que mapea los IDs de las entidades 3D en el DOM
+        const solidos = {
+            cubo: document.getElementById('solido-cubo'),
+            esfera: document.getElementById('solido-esfera'),
+            cilindro: document.getElementById('solido-cilindro')
+        };
+
+        /**
+         * Controla el estado de visibilidad de los objetos 3D y el estilo de la UI.
+         * @param {string} solidoSeleccionado - Clave del sólido elegido ('cubo', 'esfera' o 'cilindro').
+         */
+        function cambiarSolido(solidoSeleccionado) {
+            // 1. Iterar sobre el diccionario para alternar la visibilidad 3D
+            Object.keys(solidos).forEach(llave => {
+                if (llave === solidoSeleccionado) {
+                    solidos[llave].setAttribute('visible', 'true');
+                } else {
+                    solidos[llave].setAttribute('visible', 'false');
+                }
+            });
+
+            // 2. Actualizar el estado visual del menú de botones (UI)
+            const botones = document.querySelectorAll('.btn-solido');
+            botones.forEach(boton => {
+                boton.classList.remove('active');
+            });
+
+            // Encontrar el botón que disparó el evento y asignarle la clase activa
+            const botonActivo = event.target;
+            botonActivo.classList.add('active');
+        }
+    </script>
 </body>
 </html>
