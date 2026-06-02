@@ -2,148 +2,189 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor Interactivo de Sólidos en RA (Optimizado)</title>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+    <title>RA Escolar: Sólidos Geométricos</title>
+
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
-        /* Reseteo de estilos para pantalla completa en RA */
+        /* Estilos generales para asegurar que la cámara ocupe toda la pantalla */
         body {
             margin: 0;
             overflow: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             -webkit-user-select: none;
             user-select: none;
         }
 
-        /* Contenedor de la Interfaz Web flotante (UI) */
+        /* INTERFAZ DE USUARIO (UI) INTERACTIVA Y RESPONSIVE */
         #menu-container {
             position: absolute;
-            bottom: 25px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            z-index: 9999; /* Asegura el renderizado por encima del canvas 3D */
-            width: 85%;
-            max-width: 420px;
-            background: rgba(20, 20, 25, 0.75);
-            backdrop-filter: blur(12px); /* Efecto blur moderno */
-            -webkit-backdrop-filter: blur(12px);
-            border-radius: 16px;
-            padding: 10px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 500px;
+            max-height: 150px; /* Limitamos la altura para activar scroll si crece el contenido */
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(8px); /* Efecto esmerilado moderno */
+            border-radius: 15px;
+            padding: 12px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+            z-index: 9999; /* Asegura que esté por encima del canvas de la cámara */
+            
+            /* REQUISITO DE ADAPTABILIDAD Y SCROLL: */
+            overflow-x: auto; /* Scroll horizontal si los botones superan el ancho */
+            overflow-y: hidden;
             display: flex;
-            justify-content: space-between;
+            gap: 10px;
+            justify-content: flex-start;
+            align-items: center;
             box-sizing: border-box;
+            
+            /* Suavizado de scroll en iOS */
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* Estilo responsivo moderno para los botones del menú */
-        .btn-control {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.8);
-            border: none;
-            padding: 12px 16px;
+        /* Ocultar barra de scroll en navegadores modernos pero mantener funcionalidad */
+        #menu-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        #menu-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        /* Estilo de los botones interactivos */
+        .btn-solido {
+            flex: 0 0 auto; /* Evita que los botones se encojan, manteniendo su tamaño óptimo */
+            padding: 12px 20px;
+            min-width: 100px;
             font-size: 14px;
-            font-weight: 600;
+            font-weight: bold;
+            color: #2c3e50;
+            background-color: #ffffff;
+            border: 2px solid #34495e;
             border-radius: 10px;
             cursor: pointer;
-            flex: 1;
-            margin: 0 5px;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.2s ease;
             text-align: center;
-            outline: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
-        /* Clase de activación para resaltar el sólido en pantalla */
-        .btn-control.active {
-            background-color: #007aff; /* Azul eléctrico de alto contraste */
-            color: #ffffff;
-            box-shadow: 0 0 15px rgba(0, 122, 255, 0.5);
-            transform: scale(1.03);
+        /* Estado activo / seleccionado */
+        .btn-solido.active {
+            background-color: #3498db;
+            color: white;
+            border-color: #2980b9;
+            transform: scale(1.05);
         }
 
-        /* Feedback táctil nativo en dispositivos móviles */
-        .btn-control:active {
-            transform: scale(0.95);
+        /* Indicador educativo superior */
+        #info-banner {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(44, 62, 80, 0.9);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            pointer-events: none;
+            z-index: 9999;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
     </style>
 </head>
 <body>
 
+    <div id="info-banner">Apunta la cámara al marcador 'Hiro'</div>
+
     <div id="menu-container">
-        <button class="btn-control active" onclick="seleccionarSolido('cubo', this)">Cubo</button>
-        <button class="btn-control" onclick="seleccionarSolido('esfera', this)">Esfera</button>
-        <button class="btn-control" onclick="seleccionarSolido('cilindro', this)">Cilindro</button>
+        <button class="btn-solido active" onclick="cambiarSolido('cubo')">Cubo</button>
+        <button class="btn-solido" onclick="cambiarSolido('esfera')">Esfera</button>
+        <button class="btn-solido" onclick="cambiarSolido('cilindro')">Cilindro R.</button>
+        <button class="btn-solido" onclick="cambiarSolido('cono')">Cono R.</button>
     </div>
 
     <a-scene embedded 
-             arjs="sourceType: webcam; videoSettings: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }; debugUIEnabled: false;"
-             renderer="logarithmicDepthBuffer: true; precision: medium;">
-        
-        <a-marker preset="hiro">
-            
-            <a-entity position="0 0.4 0" scale="0.4 0.4 0.4">
-                
+             arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" 
+             vr-mode-ui="enabled: false"
+             renderer="logarithmicDepthBuffer: true; antialias: true;">
+
+        <a-marker preset="hiro" id="marcador-geometria">
+
+            <a-entity id="grupo-solidos" 
+                      position="0 0.5 0" 
+                      scale="0.4 0.4 0.4"
+                      animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+
                 <a-entity id="solido-cubo" visible="true">
-                    <a-box position="0 0 0" 
-                           material="color: #00c8ff; opacity: 0.8; transparent: true; roughness: 0.2;"
-                           animation="property: rotation; to: 360 360 0; loop: true; dur: 9000; easing: linear">
-                        <a-box position="0 0 0" material="wireframe: true; color: #ffffff;" scale="1.002 1.002 1.002"></a-box>
-                    </a-box>
+                    <a-box position="0 0 0" width="1.5" height="1.5" depth="1.5" color="#E74C3C" material="roughness: 0.3;"></a-box>
+                    <a-box position="0 0 0" width="1.502" height="1.502" depth="1.502" material="wireframe: true; wireframeLinewidth: 3; color: #2C3E50;"></a-box>
                 </a-entity>
+
 
                 <a-entity id="solido-esfera" visible="false">
-                    <a-sphere position="0 0 0" radius="0.65"
-                              material="color: #ff2a6d; opacity: 0.8; transparent: true; roughness: 0.2;"
-                              animation="property: rotation; to: 0 360 360; loop: true; dur: 9000; easing: linear">
-                        <a-sphere position="0 0 0" radius="0.652" material="wireframe: true; color: #ffffff;"></a-sphere>
-                    </a-sphere>
+                    <a-sphere position="0 0 0" radius="0.9" segments-width="32" segments-height="32" color="#3498DB"></a-sphere>
+                    <a-sphere position="0 0 0" radius="0.901" segments-width="16" segments-height="16" material="wireframe: true; wireframeLinewidth: 1; color: #1A5276;"></a-sphere>
                 </a-entity>
 
+
                 <a-entity id="solido-cilindro" visible="false">
-                    <a-cylinder position="0 0 0" radius="0.5" height="1.2"
-                                material="color: #05d9e8; opacity: 0.8; transparent: true; roughness: 0.2;"
-                                animation="property: rotation; to: 360 0 360; loop: true; dur: 9000; easing: linear">
-                        <a-cylinder position="0 0 0" radius="0.502" height="1.202" material="wireframe: true; color: #ffffff;"></a-cylinder>
-                    </a-cylinder>
+                    <a-cylinder position="0 0 0" radius-top="0.7" radius-bottom="0.7" height="1.8" segments-radial="32" color="#2ECC71"></a-cylinder>
+                    <a-cylinder position="0 0 0" radius-top="0.701" radius-bottom="0.701" height="1.801" segments-radial="16" material="wireframe: true; wireframeLinewidth: 2; color: #145A32;"></a-cylinder>
+                </a-entity>
+
+
+                <a-entity id="solido-cono" visible="false">
+                    <a-cone position="0 0 0" radius-bottom="0.8" radius-top="0" height="1.8" segments-radial="32" color="#F1C40F"></a-cone>
+                    <a-cone position="0 0 0" radius-bottom="0.801" radius-top="0" height="1.801" segments-radial="16" material="wireframe: true; wireframeLinewidth: 2; color: #7E5109;"></a-cone>
                 </a-entity>
 
             </a-entity>
-            
+
         </a-marker>
 
-        <a-entity camera></a-entity>
-        
+        <a-entity camera arjs-look-controls></a-entity>
+
     </a-scene>
 
     <script>
-        // Diccionario estático de referencias del DOM para optimizar rendimiento
-        const elementosSolidos = {
-            cubo: document.getElementById('solido-cubo'),
-            esfera: document.getElementById('solido-esfera'),
-            cilindro: document.getElementById('solido-cilindro')
+        // Diccionario que vincula los IDs del HTML con los IDs de las entidades 3D de A-Frame
+        const solidos = {
+            'cubo': document.getElementById('solido-cubo'),
+            'esfera': document.getElementById('solido-esfera'),
+            'cilindro': document.getElementById('solido-cilindro'),
+            'cono': document.getElementById('solido-cono')
         };
 
         /**
-         * Alterna la visibilidad de los objetos 3D y actualiza el estado de la UI.
+         * Cambia el sólido geométrico en pantalla y actualiza el estado visual de la UI.
+         * @param {string} idSeleccionado - El nombre del sólido que se desea mostrar.
          */
-        function seleccionarSolido(idSeleccionado, botonActual) {
-            // 1. Alternar visibilidad en la escena 3D
-            Object.keys(elementosSolidos).forEach(clave => {
+        function cambiarSolido(idSeleccionado) {
+            // 1. Transición inmediata y fluida: Ocultar todos los sólidos y mostrar solo el elegido
+            for (let clave in solidos) {
                 if (clave === idSeleccionado) {
-                    elementosSolidos[clave].setAttribute('visible', 'true');
+                    solidos[clave].setAttribute('visible', 'true');
                 } else {
-                    elementosSolidos[clave].setAttribute('visible', 'false');
+                    solidos[clave].setAttribute('visible', 'false');
+                }
+            }
+
+            // 2. Actualizar la interfaz de usuario (Estilos CSS de los botones)
+            const botones = document.querySelectorAll('.btn-solido');
+            botones.forEach(boton => {
+                boton.classList.remove('active');
+                // Si el evento onclick contiene el texto del ID, le asignamos la clase activa
+                if (boton.getAttribute('onclick').includes(idSeleccionado)) {
+                    boton.classList.add('active');
                 }
             });
-
-            // 2. Cambiar estilos en los botones del menú
-            const todosLosBotones = document.querySelectorAll('.btn-control');
-            todosLosBotones.forEach(btn => btn.classList.remove('active'));
-            botonActual.classList.add('active');
         }
     </script>
 </body>
