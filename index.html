@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visor Interactivo de Sólidos en RA</title>
+    <title>Visor Interactivo de Sólidos en RA (Optimizado)</title>
     
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     
@@ -85,7 +85,7 @@
         
         <a-marker preset="hiro">
             
-            <a-entity position="0 0.6 0" scale="0.75 0.75 0.75">
+            <a-entity position="0 0.4 0" scale="0.4 0.4 0.4">
                 
                 <a-entity id="solido-cubo" visible="true">
                     <a-box position="0 0 0" 
@@ -120,7 +120,7 @@
     </a-scene>
 
     <script>
-        // Almacenamos las referencias del árbol DOM en un diccionario estático para evitar búsquedas repetitivas
+        // Diccionario estático de referencias del DOM para optimizar rendimiento
         const elementosSolidos = {
             cubo: document.getElementById('solido-cubo'),
             esfera: document.getElementById('solido-esfera'),
@@ -128,13 +128,10 @@
         };
 
         /**
-         * Alterna el estado de visibilidad del motor WebXR y gestiona los estados de la UI.
-         * @param {string} idSeleccionado - Llave del sólido geométrico mapeado.
-         * @param {HTMLElement} botonActual - Elemento HTML del botón clickeado para modificar su estilo.
+         * Alterna la visibilidad de los objetos 3D y actualiza el estado de la UI.
          */
         function seleccionarSolido(idSeleccionado, botonActual) {
-            
-            // 1. Lógica Tridimensional: Recorrer las claves del diccionario y alternar visibilidad
+            // 1. Alternar visibilidad en la escena 3D
             Object.keys(elementosSolidos).forEach(clave => {
                 if (clave === idSeleccionado) {
                     elementosSolidos[clave].setAttribute('visible', 'true');
@@ -143,11 +140,9 @@
                 }
             });
 
-            // 2. Lógica de Interfaz de Usuario (UI): Resetear clases activas de todos los botones
+            // 2. Cambiar estilos en los botones del menú
             const todosLosBotones = document.querySelectorAll('.btn-control');
             todosLosBotones.forEach(btn => btn.classList.remove('active'));
-
-            // Asignar el estado activo visual únicamente al botón interactuado
             botonActual.classList.add('active');
         }
     </script>
