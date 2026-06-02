@@ -80,7 +80,7 @@
     </div>
 
     <a-scene embedded 
-             arjs="sourceType: webcam; videoSettings: { facingMode: 'environment' }; debugUIEnabled: false;"
+             arjs="sourceType: webcam; videoSettings: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } }; debugUIEnabled: false;"
              renderer="logarithmicDepthBuffer: true; precision: medium;">
         
         <a-marker preset="hiro">
@@ -137,10 +137,8 @@
             // 1. Lógica Tridimensional: Recorrer las claves del diccionario y alternar visibilidad
             Object.keys(elementosSolidos).forEach(clave => {
                 if (clave === idSeleccionado) {
-                    // Muestra el sólido seleccionado estableciendo el atributo nativo de A-Frame
                     elementosSolidos[clave].setAttribute('visible', 'true');
                 } else {
-                    // Oculta los sólidos restantes para liberar procesamiento de fragmentos
                     elementosSolidos[clave].setAttribute('visible', 'false');
                 }
             });
