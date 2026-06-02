@@ -2,200 +2,243 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>RA - Sólidos Geométricos AR</title>
+<title>RA - Sólidos Geométricos</title>
 
-<!-- A-Frame -->
 <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-
-<!-- AR.js -->
 <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
 <style>
-    *{
-        margin:0;
-        padding:0;
-        box-sizing:border-box;
-        font-family:Arial, Helvetica, sans-serif;
-    }
 
-    body{
-        overflow:hidden;
-    }
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:Arial, sans-serif;
+}
 
-    /* Menú flotante */
-    #menu{
-        position:fixed;
-        bottom:20px;
-        left:50%;
-        transform:translateX(-50%);
-        display:flex;
-        gap:10px;
-        z-index:999;
-        background:rgba(0,0,0,0.65);
-        padding:12px;
-        border-radius:15px;
-        backdrop-filter:blur(5px);
-    }
+#menu{
+    position:fixed;
+    bottom:15px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:8px;
+    z-index:999;
+    width:95%;
+}
 
-    .btn{
-        border:none;
-        padding:12px 18px;
-        border-radius:10px;
-        color:white;
-        cursor:pointer;
-        font-weight:bold;
-        transition:0.3s;
-    }
+#menu button{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
 
-    .btn:hover{
-        transform:scale(1.05);
-    }
+.cubo{background:#2196F3;}
+.esfera{background:#4CAF50;}
+.cilindro{background:#FF9800;}
+.tetraedro{background:#9C27B0;}
+.octaedro{background:#E91E63;}
 
-    .cubo{
-        background:#2196F3;
-    }
+#info{
+    position:fixed;
+    top:10px;
+    left:10px;
+    z-index:999;
+    background:rgba(0,0,0,.7);
+    color:white;
+    padding:10px;
+    border-radius:10px;
+    width:260px;
+}
 
-    .esfera{
-        background:#4CAF50;
-    }
-
-    .cilindro{
-        background:#FF9800;
-    }
-
-    @media(max-width:600px){
-        #menu{
-            width:95%;
-            justify-content:center;
-            flex-wrap:wrap;
-        }
-
-        .btn{
-            flex:1;
-            min-width:90px;
-        }
-    }
 </style>
 </head>
 
 <body>
 
-<!-- MENÚ -->
-<div id="menu">
-    <button class="btn cubo" onclick="mostrarFigura('cubo')">
-        Cubo
-    </button>
-
-    <button class="btn esfera" onclick="mostrarFigura('esfera')">
-        Esfera
-    </button>
-
-    <button class="btn cilindro" onclick="mostrarFigura('cilindro')">
-        Cilindro
-    </button>
+<div id="info">
+    <h3 id="titulo">Cubo</h3>
+    <p id="datos">
+        Caras: 6<br>
+        Aristas: 12<br>
+        Vértices: 8
+    </p>
 </div>
 
-<!-- ESCENA AR -->
+<div id="menu">
+
+<button class="cubo"
+onclick="mostrarFigura('cubo')">
+Cubo
+</button>
+
+<button class="esfera"
+onclick="mostrarFigura('esfera')">
+Esfera
+</button>
+
+<button class="cilindro"
+onclick="mostrarFigura('cilindro')">
+Cilindro
+</button>
+
+<button class="tetraedro"
+onclick="mostrarFigura('tetraedro')">
+Tetraedro
+</button>
+
+<button class="octaedro"
+onclick="mostrarFigura('octaedro')">
+Octaedro
+</button>
+
+</div>
+
 <a-scene
-    embedded
-    arjs="sourceType: webcam; debugUIEnabled: false;"
->
+embedded
+arjs="sourceType:webcam;debugUIEnabled:false;">
 
-    <!-- Marcador Hiro -->
-    <a-marker preset="hiro">
+<a-marker preset="hiro">
 
-        <!-- CUBO -->
-        <a-box
-            id="cubo"
-            position="0 0.5 0"
-            depth="1"
-            height="1"
-            width="1"
-            color="#2196F3"
-            visible="true"
-            animation="property: rotation;
-                       to: 0 360 0;
-                       loop: true;
-                       dur: 6000;
-                       easing: linear;">
-        </a-box>
+<!-- CUBO -->
+<a-box
+id="cubo"
+position="0 0.7 0"
+color="#2196F3"
+animation="property: rotation;
+to:0 360 0;
+loop:true;
+dur:8000;
+easing:linear">
+</a-box>
 
-        <!-- ESFERA -->
-        <a-sphere
-            id="esfera"
-            position="0 0.7 0"
-            radius="0.6"
-            color="#4CAF50"
-            visible="false"
-            animation="property: rotation;
-                       to: 0 360 0;
-                       loop: true;
-                       dur: 6000;
-                       easing: linear;">
-        </a-sphere>
+<!-- ESFERA -->
+<a-sphere
+id="esfera"
+position="0 0.7 0"
+radius="0.7"
+color="#4CAF50"
+visible="false"
+animation="property: rotation;
+to:0 360 0;
+loop:true;
+dur:8000;
+easing:linear">
+</a-sphere>
 
-        <!-- CILINDRO -->
-        <a-cylinder
-            id="cilindro"
-            position="0 0.7 0"
-            radius="0.5"
-            height="1.2"
-            color="#FF9800"
-            visible="false"
-            animation="property: rotation;
-                       to: 0 360 0;
-                       loop: true;
-                       dur: 6000;
-                       easing: linear;">
-        </a-cylinder>
+<!-- CILINDRO -->
+<a-cylinder
+id="cilindro"
+position="0 0.7 0"
+radius="0.5"
+height="1.2"
+color="#FF9800"
+visible="false"
+animation="property: rotation;
+to:0 360 0;
+loop:true;
+dur:8000;
+easing:linear">
+</a-cylinder>
 
-        <!-- Bordes del cubo -->
-        <a-box
-            position="0 0.5 0"
-            depth="1.02"
-            height="1.02"
-            width="1.02"
-            material="color:black; wireframe:true"
-            visible="true"
-            id="bordeCubo">
-        </a-box>
+<!-- TETRAEDRO -->
+<a-tetrahedron
+id="tetraedro"
+position="0 0.8 0"
+radius="0.8"
+color="#9C27B0"
+visible="false"
+animation="property: rotation;
+to:360 360 0;
+loop:true;
+dur:8000;
+easing:linear">
+</a-tetrahedron>
 
-    </a-marker>
+<!-- OCTAEDRO -->
+<a-octahedron
+id="octaedro"
+position="0 0.8 0"
+radius="0.8"
+color="#E91E63"
+visible="false"
+animation="property: rotation;
+to:360 360 0;
+loop:true;
+dur:8000;
+easing:linear">
+</a-octahedron>
 
-    <!-- Cámara -->
-    <a-entity camera></a-entity>
+</a-marker>
+
+<a-entity camera></a-entity>
 
 </a-scene>
 
 <script>
 
-/*
-==================================================
-FUNCIÓN PARA CAMBIAR ENTRE FIGURAS
-==================================================
-*/
-function mostrarFigura(figuraSeleccionada){
+const info = {
 
-    // Ocultar todas las figuras
-    document.querySelector('#cubo').setAttribute('visible', false);
-    document.querySelector('#esfera').setAttribute('visible', false);
-    document.querySelector('#cilindro').setAttribute('visible', false);
+cubo:{
+titulo:"Cubo",
+texto:"Caras: 6<br>Aristas: 12<br>Vértices: 8"
+},
 
-    // Ocultar borde del cubo
-    document.querySelector('#bordeCubo')
-            .setAttribute('visible', false);
+esfera:{
+titulo:"Esfera",
+texto:"Superficie curva<br>No tiene aristas<br>No tiene vértices"
+},
 
-    // Mostrar figura seleccionada
-    document.querySelector('#' + figuraSeleccionada)
-            .setAttribute('visible', true);
+cilindro:{
+titulo:"Cilindro",
+texto:"2 bases circulares<br>1 superficie curva<br>Altura h"
+},
 
-    // Mostrar borde solamente cuando sea cubo
-    if(figuraSeleccionada === 'cubo'){
-        document.querySelector('#bordeCubo')
-                .setAttribute('visible', true);
-    }
+tetraedro:{
+titulo:"Tetraedro",
+texto:"Caras: 4<br>Aristas: 6<br>Vértices: 4"
+},
+
+octaedro:{
+titulo:"Octaedro",
+texto:"Caras: 8<br>Aristas: 12<br>Vértices: 6"
+}
+
+};
+
+function mostrarFigura(figura){
+
+const figuras=[
+'cubo',
+'esfera',
+'cilindro',
+'tetraedro',
+'octaedro'
+];
+
+figuras.forEach(f=>{
+document
+.getElementById(f)
+.setAttribute('visible',false);
+});
+
+document
+.getElementById(figura)
+.setAttribute('visible',true);
+
+document
+.getElementById('titulo')
+.innerHTML=info[figura].titulo;
+
+document
+.getElementById('datos')
+.innerHTML=info[figura].texto;
 }
 
 </script>
